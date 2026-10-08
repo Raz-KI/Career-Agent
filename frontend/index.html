@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PathWay — AI career navigator</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">PW</span>
+      <div>
+        <strong>PathWay</strong>
+        <p class="tag">AI career navigator for people rebuilding work in the UK</p>
+      </div>
+    </div>
+    <div class="header-controls">
+      <label>
+        Language
+        <select id="language" aria-label="Preferred language of explanations">
+          <option value="en">English</option>
+          <option value="uk">Українська</option>
+          <option value="pl">Polski</option>
+          <option value="ru">Русский</option>
+          <option value="ar">العربية</option>
+          <option value="es">Español</option>
+          <option value="ro">Română</option>
+        </select>
+      </label>
+      <fieldset class="mode-toggle" role="radiogroup" aria-label="Input mode">
+        <legend class="sr-only">Mode</legend>
+        <label><input type="radio" name="mode" value="text" checked /> Text</label>
+        <label><input type="radio" name="mode" value="voice" /> Voice</label>
+      </fieldset>
+      <label class="toggle">
+        <input type="checkbox" id="simpleEnglish" />
+        Simple English
+      </label>
+      <button type="button" class="ghost" id="deleteData" aria-label="Delete my data">Delete my data</button>
+    </div>
+  </header>
+
+  <div id="voiceBar" class="voice-bar hidden" role="status">
+    <span id="voiceStatus">Voice ready</span>
+    <button type="button" id="micBtn" class="mic" aria-label="Start recording">Hold to talk</button>
+    <audio id="ttsPlayer" hidden></audio>
+  </div>
+
+  <nav class="progress" id="progressNav" aria-label="Steps" hidden>
+    <ol>
+      <li data-step="1"><button type="button">1. Profile</button></li>
+      <li data-step="2"><button type="button">2. Careers</button></li>
+      <li data-step="3"><button type="button">3. Jobs</button></li>
+      <li data-step="4"><button type="button">4. Match</button></li>
+      <li data-step="5"><button type="button">5. Apply</button></li>
+      <li data-step="6"><button type="button">6. Interview</button></li>
+    </ol>
+  </nav>
+
+  <main id="main">
+    <section id="view-privacy" class="card">
+      <h1>Before we start</h1>
+      <p>PathWay helps you explore UK career options, review AI-generated role suggestions, strengthen job applications, and practise interviews for any professional background. Suggestions are not live vacancies.</p>
+      <ul class="plain">
+        <li>Your CV and answers are processed to generate personalized career guidance.</li>
+        <li>We do not keep a database. Data lives in this browser tab and in server memory until restart.</li>
+        <li>This is <strong>not</strong> legal, immigration, or medical advice. Verify with official sources and a human adviser.</li>
+      </ul>
+      <label class="consent">
+        <input type="checkbox" id="privacyOk" />
+        I understand and want to continue
+      </label>
+      <div class="actions">
+        <button type="button" id="acceptPrivacy" class="primary" disabled>Continue</button>
+      </div>
+    </section>
+
+    <section id="view-profile" class="card hidden">
+      <h1>Step 1: Your profile</h1>
+      <p>Upload a CV, paste your story, or speak, then review and complete your skills, work experience, education, languages, and preferences. Check every field — we must not invent facts.</p>
+      <div class="row">
+        <label class="grow">Upload CV (PDF, DOCX, TXT)
+          <input type="file" id="cvFile" accept=".pdf,.docx,.txt,application/pdf" />
+        </label>
+        <button type="button" id="uploadCv">Extract from file</button>
+      </div>
+      <label>Or paste / dictate your background
+        <textarea id="profileText" rows="5" placeholder="I was a nurse in Kyiv for 12 years…"></textarea>
+      </label>
+      <div class="actions">
+        <button type="button" id="fromText">Build profile from text</button>
+        <button type="button" id="speakProfile" class="ghost">Speak my story</button>
+      </div>
+      <div id="extractNotice"></div>
+      <div id="profileForm" class="stack"></div>
+      <div class="actions">
+        <button type="button" class="primary" id="saveProfile">Save and see career options</button>
+      </div>
+    </section>
+
+    <section id="view-step1" class="hidden"></section>
+    <section id="view-step2" class="hidden"></section>
+    <section id="view-step3" class="hidden"></section>
+    <section id="view-step4" class="hidden"></section>
+    <section id="view-step5" class="hidden"></section>
+    <section id="view-handoff" class="card hidden"></section>
+  </main>
+
+  <div id="busy" class="busy hidden" role="status" aria-live="polite">
+    <div class="spinner"></div>
+    <p id="busyText">Thinking…</p>
+  </div>
+
+  <div id="safetyModal" class="modal hidden" role="dialog" aria-labelledby="safetyTitle">
+    <div class="card">
+      <h2 id="safetyTitle">Please pause</h2>
+      <p id="safetyMsg"></p>
+      <ul id="safetyResources"></ul>
+      <div class="actions">
+        <button type="button" id="safetyHandoff" class="primary">Share summary with a human adviser</button>
+        <button type="button" id="safetyClose" class="ghost">Continue with career help only</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <p>AI guidance, not legal or immigration advice. Verify with official sources. This tool supports human advisers; it doesn't replace them.</p>
+    <p>Emergency 999 · Samaritans 116 123 · ACAS 0300 123 1100 · GOV.UK / National Careers Service</p>
+    <button type="button" class="linkish" id="openHandoff">Share summary with a human adviser</button>
+  </footer>
+
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>

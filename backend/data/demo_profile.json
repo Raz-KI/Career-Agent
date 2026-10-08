@@ -1,0 +1,72 @@
+{
+  "name": "Olena Kovalenko",
+  "summary": "Registered nurse from Ukraine with 12 years of hospital experience in medical and surgical wards. Relocated to the UK in 2023. Currently caring for a young child and looking for a first UK healthcare or care role while exploring the NMC registration route. English at B1. Honest, calm, and used to working in busy teams.",
+  "skills": [
+    "Patient care",
+    "Vital signs",
+    "Wound care",
+    "Medication administration",
+    "Infection control",
+    "Hand hygiene",
+    "Record keeping",
+    "Teamwork",
+    "Empathy",
+    "Supporting families",
+    "Shift work (historical)",
+    "Basic first aid"
+  ],
+  "experience": [
+    {
+      "title": "Staff Nurse, Medical-Surgical Ward",
+      "employer": "Kyiv City Clinical Hospital No. 4",
+      "country": "Ukraine",
+      "years": "2011–2022 (12 years)",
+      "achievements": [
+        "Cared for 12–18 adult patients per shift including post-operative recovery",
+        "Took vital signs, changed dressings, and administered prescribed medicines under hospital protocol",
+        "Supported families during difficult conversations with the medical team",
+        "Mentored junior nurses on infection control and handover",
+        "Kept paper and electronic nursing notes"
+      ]
+    },
+    {
+      "title": "Student Nurse placements",
+      "employer": "Bogomolets National Medical University affiliated hospitals",
+      "country": "Ukraine",
+      "years": "2007–2011",
+      "achievements": [
+        "Completed clinical placements in medicine, surgery, and elderly care"
+      ]
+    }
+  ],
+  "education": [
+    {
+      "qualification": "Bachelor of Nursing",
+      "institution": "Bogomolets National Medical University",
+      "country": "Ukraine",
+      "year": "2011"
+    }
+  ],
+  "languages": [
+    {"language": "Ukrainian", "level": "Native"},
+    {"language": "Russian", "level": "Fluent"},
+    {"language": "English", "level": "B1"}
+  ],
+  "certifications": [
+    "Ukrainian nursing diploma (2011)",
+    "Hospital infection-control in-service training (Ukraine)"
+  ],
+  "gaps_or_breaks": [
+    "Career break from late 2022 for relocation to the UK and full-time childcare for a toddler (now 3 years old). Ready to return to work with school-hours or part-time preferred at first."
+  ],
+  "location": "Manchester, UK",
+  "constraints": [
+    "Prefer daytime or school-hours where possible because of childcare",
+    "No UK workplace references yet",
+    "Not yet on the NMC register — must not be presented as a UK registered nurse",
+    "Needs a role that can start while English continues to improve"
+  ],
+  "preferred_language": "uk",
+  "simple_english": true,
+  "raw_text": "Olena Kovalenko, Ukrainian nurse, 12 years Kyiv City Clinical Hospital, B1 English, Manchester, career gap for childcare, no UK references, not NMC registered."
+}
