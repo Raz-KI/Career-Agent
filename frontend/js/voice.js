@@ -11,36 +11,39 @@ export function setStatus(text) {
 
 export async function playText(text, { slow = false, statusElementId } = {}) {
   if (!text) return;
-  const updatePlaybackStatus = (text) => {
+  const updatePlaybackStatus = (t) => {
     const element = statusElementId && document.getElementById(statusElementId);
-    if (element) element.textContent = text;
+    if (element) element.textContent = t;
   };
-  setStatus("Speaking…");
-  updatePlaybackStatus("Preparing audio…");
-  let objectUrl = "";
+  if (!("speechSynthesis" in window)) {
+    setStatus("Text-to-speech not supported in this browser.");
+    updatePlaybackStatus("Text-to-speech not supported.");
+    return;
+  }
   try {
-    const blob = await tts(text, slow ? 0.8 : 1.0);
-    const player = document.getElementById("ttsPlayer");
-    player.pause();
-    if (player.dataset.objectUrl) URL.revokeObjectURL(player.dataset.objectUrl);
-    objectUrl = URL.createObjectURL(blob);
-    player.dataset.objectUrl = objectUrl;
-    player.onended = () => {
-      URL.revokeObjectURL(objectUrl);
-      delete player.dataset.objectUrl;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = slow ? 0.8 : 1.0;
+    utterance.lang = "en-GB";
+
+    utterance.onstart = () => {
+      setStatus("Speaking…");
+      updatePlaybackStatus("Speaking now…");
+    };
+    utterance.onend = () => {
+      setStatus("Voice ready");
       updatePlaybackStatus("Audio finished.");
     };
-    player.onerror = () => updatePlaybackStatus("Audio could not be played. Try Replay or read the text.");
-    player.src = objectUrl;
-    await player.play();
-    updatePlaybackStatus("Speaking now…");
+    utterance.onerror = () => {
+      setStatus("Voice ready");
+      updatePlaybackStatus("Audio playback finished or cancelled.");
+    };
+
+    window.speechSynthesis.speak(utterance);
   } catch (err) {
-    if (objectUrl) URL.revokeObjectURL(objectUrl);
-    const message = err.message || "Could not speak. Read the text instead.";
+    const message = err.message || "Could not speak text.";
     setStatus(message);
     updatePlaybackStatus(`Audio unavailable: ${message}`);
-  } finally {
-    setStatus("Voice ready");
   }
 }
 

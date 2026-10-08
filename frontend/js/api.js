@@ -48,6 +48,10 @@ export const safetyCheck = (text, preferred_language) =>
 export const handoffSummary = (body) => api("/api/handoff/summary", { method: "POST", json: body });
 export const deleteSession = (session_id) =>
   api("/api/session/delete", { method: "POST", json: { session_id } });
+export const insights = (jobs, custom_cv) =>
+  api("/api/insights", { method: "POST", json: { jobs, custom_cv } });
+export const languageTest = (text, target_role) =>
+  api("/api/profile/language_test", { method: "POST", json: { text, target_role } });
 
 export async function exportDoc(body) {
   const res = await fetch("/api/application/export", {

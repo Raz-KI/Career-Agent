@@ -1,4 +1,4 @@
-import * as api from "./api.js";
+import * as api from "./api.js?v=20261008-insights";
 import * as voice from "./voice.js";
 import * as ui from "./ui.js";
 
@@ -59,6 +59,10 @@ function setStep(n) {
   if (n === 4) show("view-step3");
   if (n === 5) show("view-step4");
   if (n === 6) show("view-step5");
+  if (n === 7) {
+    show("view-step7");
+    renderAnalytics();
+  }
 }
 
 function maybeSafety(payload) {
@@ -603,7 +607,7 @@ async function runEval() {
 
               <p id="exemplarAudioStatus-${i}" class="muted" aria-live="polite"></p>
               <div class="actions" style="margin-top: 0.75rem;">
-                <button type="button" class="accent btn-listen-exemplar" data-text="${ui.escapeHtml(exemplarText)}">🔊 Listen to Exemplar Answer (Tom — ElevenLabs)</button>
+                <button type="button" class="accent btn-listen-exemplar" data-text="${ui.escapeHtml(exemplarText)}">🔊 Listen to Exemplar Answer</button>
               </div>
             </div>
           </article>`;
@@ -668,6 +672,292 @@ function openHandoff() {
     api.exportDoc({ kind: "handoff", handoff_text: state.handoff || "", name: state.profile?.name });
 }
 
+const KEY_TRACKER = "job-tracker-v2";
+
+function getSampleJobs() {
+  const d = (n) => {
+    const t = new Date();
+    t.setDate(t.getDate() - n);
+    return t.toISOString().slice(0, 10);
+  };
+  return [
+    { id: 1, role: "Product designer", co: "Northwind", date: d(1), s: "applied", cat: "Design", type: "Remote", skills: ["figma", "prototyping", "user research", "design systems"], desc: "Own end-to-end design of a B2B product." },
+    { id: 2, role: "Frontend engineer", co: "Lumen Labs", date: d(2), s: "interview", cat: "Engineering", type: "Remote", skills: ["react", "javascript", "css", "typescript"], desc: "Build the customer web app in React." },
+    { id: 3, role: "UX researcher", co: "Harbor Health", date: d(4), s: "rejected", cat: "Research", type: "On-site", skills: ["user research", "interviewing", "analytics", "figma"], desc: "Run studies with patients and clinicians." },
+    { id: 4, role: "Design systems lead", co: "Fieldnote", date: d(6), s: "applied", cat: "Design", type: "Hybrid", skills: ["design systems", "figma", "css", "accessibility"], desc: "Lead the component library and standards." },
+    { id: 5, role: "Web developer", co: "Kestrel Studio", date: d(8), s: "offer", cat: "Engineering", type: "Remote", skills: ["html", "css", "javascript", "react"], desc: "Ship marketing sites and web apps for clients." },
+    { id: 6, role: "Product engineer", co: "Tidewater", date: d(10), s: "interview", cat: "Engineering", type: "Hybrid", skills: ["react", "node", "typescript", "sql"], desc: "Work across the stack on new features." },
+    { id: 7, role: "Interaction designer", co: "Paperplane", date: d(13), s: "rejected", cat: "Design", type: "On-site", skills: ["figma", "prototyping", "motion", "user research"], desc: "Design animations and flows for a mobile app." },
+    { id: 8, role: "Full-stack developer", co: "Brightside", date: d(15), s: "applied", cat: "Engineering", type: "Hybrid", skills: ["javascript", "node", "sql", "python"], desc: "Build APIs and interfaces for internal tools." },
+    { id: 9, role: "Data analyst", co: "Orchard", date: d(17), s: "rejected", cat: "Data", type: "On-site", skills: ["sql", "python", "tableau", "excel"], desc: "Report on product and sales performance." },
+    { id: 10, role: "Content designer", co: "Pinewood", date: d(19), s: "applied", cat: "Design", type: "Remote", skills: ["writing", "figma", "user research", "accessibility"], desc: "Shape product language and UX writing." }
+  ];
+}
+
+function loadTrackerJobs() {
+  try {
+    const raw = localStorage.getItem(KEY_TRACKER);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length) return parsed;
+    }
+  } catch (e) {}
+  return getSampleJobs();
+}
+
+function saveTrackerJobs(jobs) {
+  try {
+    localStorage.setItem(KEY_TRACKER, JSON.stringify(jobs));
+  } catch (e) {}
+}
+
+function renderAnalytics() {
+  const root = document.getElementById("view-step7");
+  let jobs = loadTrackerJobs();
+  const count = (status) => jobs.filter((j) => j.s === status).length;
+
+  const total = jobs.length;
+  const numInterview = count("interview");
+  const numOffer = count("offer");
+  const numRejected = count("rejected");
+  const numApplied = count("applied");
+
+  root.innerHTML = `
+    <div class="card">
+      <h1>Step 7: Job Search Tracker & AI Analytics</h1>
+      <p class="muted">Track your live applications and generate AI pattern insights for your UK job search.</p>
+
+      <div class="columns" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin: 1rem 0;">
+        <div style="background: var(--bg); padding: 1rem; border-radius: 12px; border-top: 4px solid #3f6fa8; text-align: center;">
+          <b style="font-size: 2rem; color: #3f6fa8;">${total}</b>
+          <p class="muted" style="margin:0;">Total Applied</p>
+        </div>
+        <div style="background: var(--bg); padding: 1rem; border-radius: 12px; border-top: 4px solid #b97a0e; text-align: center;">
+          <b style="font-size: 2rem; color: #b97a0e;">${numInterview}</b>
+          <p class="muted" style="margin:0;">Interviews</p>
+        </div>
+        <div style="background: var(--bg); padding: 1rem; border-radius: 12px; border-top: 4px solid #b14a55; text-align: center;">
+          <b style="font-size: 2rem; color: #b14a55;">${numRejected}</b>
+          <p class="muted" style="margin:0;">Rejections</p>
+        </div>
+        <div style="background: var(--bg); padding: 1rem; border-radius: 12px; border-top: 4px solid #2b8a57; text-align: center;">
+          <b style="font-size: 2rem; color: #2b8a57;">${numOffer}</b>
+          <p class="muted" style="margin:0;">Offers</p>
+        </div>
+      </div>
+
+      <div style="background: var(--bg); padding: 1rem; border-radius: 12px; border: 1px solid var(--line); margin-bottom: 1.5rem;">
+        <h2>Status Breakdown</h2>
+        <div style="display: flex; height: 16px; border-radius: 8px; overflow: hidden; background: var(--line); margin: 0.5rem 0;">
+          <i style="background: #3f6fa8; width: ${total ? (numApplied / total) * 100 : 0}%;"></i>
+          <i style="background: #b97a0e; width: ${total ? (numInterview / total) * 100 : 0}%;"></i>
+          <i style="background: #2b8a57; width: ${total ? (numOffer / total) * 100 : 0}%;"></i>
+          <i style="background: #b14a55; width: ${total ? (numRejected / total) * 100 : 0}%;"></i>
+        </div>
+        <div style="display: flex; gap: 1rem; font-size: 0.85rem; color: var(--muted); flex-wrap: wrap;">
+          <span>🔵 Applied: ${numApplied}</span>
+          <span>🟡 Interview: ${numInterview}</span>
+          <span>🟢 Offered: ${numOffer}</span>
+          <span>🔴 Rejected: ${numRejected}</span>
+        </div>
+      </div>
+
+      <h2>Recent Applications</h2>
+      <div style="overflow-x: auto; margin-bottom: 1.5rem;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--line); text-align: left;">
+              <th style="padding: 8px;">Role & Company</th>
+              <th style="padding: 8px;">Date</th>
+              <th style="padding: 8px;">Status</th>
+            </tr>
+          </thead>
+          <tbody id="trackerRows">
+            ${jobs
+              .map(
+                (j) => `<tr style="border-bottom: 1px solid var(--line);">
+              <td style="padding: 8px;"><strong>${ui.escapeHtml(j.role)}</strong><br/><small class="muted">${ui.escapeHtml(j.co)}</small></td>
+              <td style="padding: 8px;">${j.date || "Recent"}</td>
+              <td style="padding: 8px;">
+                <select class="status-select" data-id="${j.id}" style="padding: 4px 8px; border-radius: 6px;">
+                  <option value="applied" ${j.s === "applied" ? "selected" : ""}>Applied</option>
+                  <option value="interview" ${j.s === "interview" ? "selected" : ""}>Interview received</option>
+                  <option value="offer" ${j.s === "offer" ? "selected" : ""}>Offered</option>
+                  <option value="rejected" ${j.s === "rejected" ? "selected" : ""}>Rejected</option>
+                </select>
+              </td>
+            </tr>`
+              )
+              .join("")}
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Add New Application</h2>
+      <form id="addTrackerForm" class="row" style="flex-wrap: wrap; gap: 0.8rem; align-items: flex-end; margin-bottom: 1.5rem;">
+        <label class="grow">Job Title<input type="text" id="trRole" required placeholder="e.g. Full-stack Developer" /></label>
+        <label class="grow">Company<input type="text" id="trCo" required placeholder="e.g. Acme Corp" /></label>
+        <label>Category
+          <select id="trCat"><option>Engineering</option><option>Design</option><option>Research</option><option>Data</option><option>Other</option></select>
+        </label>
+        <label>Work Type
+          <select id="trType"><option>Remote</option><option>Hybrid</option><option>On-site</option></select>
+        </label>
+        <label style="width: 100%;">Required Skills (comma-separated)<input type="text" id="trSkills" placeholder="e.g. react, node, sql" /></label>
+        <button type="submit" class="primary">Add Application</button>
+        <button type="button" id="btnResetTracker" class="ghost">Reset Sample Data</button>
+      </form>
+
+      <div style="background: var(--bg); padding: 1.25rem; border-radius: 12px; border: 1px solid var(--accent);">
+        <h2>🤖 ElevenLabs & AI Search Insights</h2>
+        <p class="muted">Generate customized AI feedback on your application patterns, CV skill coverage, and high-conversion role types.</p>
+        <div class="actions">
+          <button type="button" class="accent" id="btnGenInsights">⚡ Generate AI Insights</button>
+        </div>
+        <div id="insightsContainer" style="margin-top: 1rem;"></div>
+      </div>
+
+      <div class="actions" style="margin-top: 1.5rem;">
+        <button type="button" class="ghost" id="backToInterviewFromAnalytics">Back to Interview Prep</button>
+      </div>
+    </div>
+  `;
+
+  root.querySelectorAll(".status-select").forEach((sel) => {
+    sel.onchange = () => {
+      const id = Number(sel.dataset.id);
+      const target = jobs.find((j) => j.id === id);
+      if (target) {
+        target.s = sel.value;
+        saveTrackerJobs(jobs);
+        renderAnalytics();
+      }
+    };
+  });
+
+  document.getElementById("addTrackerForm")?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const role = document.getElementById("trRole").value.trim();
+    const co = document.getElementById("trCo").value.trim();
+    const cat = document.getElementById("trCat").value;
+    const type = document.getElementById("trType").value;
+    const skills = document.getElementById("trSkills").value
+      .split(",")
+      .map((s) => s.trim().toLowerCase())
+      .filter(Boolean);
+    if (!role || !co) return;
+
+    jobs.push({
+      id: Date.now(),
+      role,
+      co,
+      date: new Date().toISOString().slice(0, 10),
+      s: "applied",
+      cat,
+      type,
+      skills,
+    });
+    saveTrackerJobs(jobs);
+    renderAnalytics();
+  });
+
+  document.getElementById("btnResetTracker")?.addEventListener("click", () => {
+    jobs = getSampleJobs();
+    saveTrackerJobs(jobs);
+    renderAnalytics();
+  });
+
+  document.getElementById("btnGenInsights")?.addEventListener("click", async () => {
+    const container = document.getElementById("insightsContainer");
+    container.innerHTML = `<p class="muted">Analysing application patterns with ElevenLabs & rules engine…</p>`;
+    try {
+      const res = await api.insights(
+        jobs,
+        state.profile
+          ? {
+              name: state.profile.name,
+              title: state.chosenPath?.title || "Candidate",
+              summary: state.profile.summary,
+              skills: state.profile.skills || [],
+              bullets: (state.profile.experience || []).flatMap((e) => e.achievements || []),
+            }
+          : null
+      );
+
+      const head = res.headline || {};
+      const cvFeedback = (res.cv || []).map((t) => `<li>${ui.escapeHtml(t)}</li>`).join("");
+      const matches = (res.matches || [])
+        .map(
+          (m) => `<div style="padding: 8px 0; border-top: 1px solid var(--line);">
+          <strong>${ui.escapeHtml(m.role)}</strong> at ${ui.escapeHtml(m.co)} — <span class="badge ${m.match >= 75 ? "relevant" : "partially_relevant"}">${m.match}% Skill Match</span>
+          <small class="muted" style="display:block;">${m.missing?.length ? `Missing from CV: ${m.missing.join(", ")}` : "Full skill overlap!"}</small>
+        </div>`
+        )
+        .join("");
+
+      container.innerHTML = `
+        <div style="background: #fff; padding: 1rem; border-radius: 8px; border-left: 6px solid ${head.tone === "good" ? "var(--ok)" : head.tone === "warn" ? "var(--warn)" : "var(--accent)"}; margin-bottom: 1rem;">
+          <h3 style="margin: 0 0 0.3rem;">${ui.escapeHtml(head.title)}</h3>
+          <p style="margin: 0;">${ui.escapeHtml(head.text)}</p>
+        </div>
+
+        <div style="background: #fff; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid var(--line);">
+          <h4 style="margin: 0 0 0.5rem;">CV & Skill Feedback</h4>
+          <ul style="margin: 0; padding-left: 1.2rem;">${cvFeedback}</ul>
+        </div>
+
+        <div style="background: #fff; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid var(--line);">
+          <h4 style="margin: 0 0 0.5rem;">Positive Application Patterns</h4>
+          <p style="margin: 0 0 0.5rem;">${ui.escapeHtml(res.patterns?.text || "")}</p>
+        </div>
+
+        <div style="background: #fff; padding: 1rem; border-radius: 8px; border: 1px solid var(--line);">
+          <h4 style="margin: 0 0 0.5rem;">Top Role Skill Matches</h4>
+          ${matches}
+        </div>
+      `;
+    } catch (err) {
+      container.innerHTML = `<p style="color: var(--danger);">Failed to generate insights: ${ui.escapeHtml(err.message)}</p>`;
+    }
+  });
+
+  document.getElementById("backToInterviewFromAnalytics")?.addEventListener("click", () => {
+    setStep(6);
+  });
+}
+
+function isLoggedIn() {
+  try {
+    return sessionStorage.getItem("pathway-session") === "1";
+  } catch (e) {
+    return false;
+  }
+}
+
+function setLoggedIn(v) {
+  try {
+    if (v) sessionStorage.setItem("pathway-session", "1");
+    else sessionStorage.removeItem("pathway-session");
+  } catch (e) {}
+}
+
+function checkAuth() {
+  const authed = isLoggedIn();
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) logoutBtn.classList.toggle("hidden", !authed);
+
+  if (!authed) {
+    document.getElementById("progressNav").hidden = true;
+    show("view-login");
+  } else {
+    if (!state.privacy) {
+      show("view-privacy");
+    } else {
+      setStep(state.step || 1);
+    }
+  }
+}
+
 function resetAll() {
   api.deleteSession(state.sessionId).catch(() => {});
   Object.assign(state, {
@@ -687,11 +977,29 @@ function resetAll() {
     safetyFlags: [],
     step: 0,
   });
-  document.getElementById("progressNav").hidden = true;
-  show("view-privacy");
+  checkAuth();
 }
 
 function bind() {
+  document.getElementById("loginForm")?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const u = document.getElementById("u").value.trim();
+    const p = document.getElementById("p").value;
+    const err = document.getElementById("loginErr");
+    if (u === "test" && p === "test") {
+      if (err) err.textContent = "";
+      setLoggedIn(true);
+      checkAuth();
+    } else {
+      if (err) err.textContent = "Incorrect username or password. Try test / test.";
+    }
+  });
+
+  document.getElementById("logoutBtn")?.addEventListener("click", () => {
+    setLoggedIn(false);
+    checkAuth();
+  });
+
   document.getElementById("privacyOk").onchange = (e) => {
     document.getElementById("acceptPrivacy").disabled = !e.target.checked;
   };
@@ -724,6 +1032,43 @@ function bind() {
     document.getElementById("safetyModal").classList.add("hidden");
     openHandoff();
   };
+
+  document.getElementById("btnRunLangTest")?.addEventListener("click", async () => {
+    const textInput =
+      document.getElementById("langSampleInput")?.value.trim() ||
+      state.profile?.summary ||
+      document.getElementById("profileText")?.value;
+    if (!textInput) {
+      alert("Please enter a short sentence or speech intro to evaluate.");
+      return;
+    }
+    const resultContainer = document.getElementById("langTestResult");
+    resultContainer.innerHTML = `<p class="muted">Evaluating workplace communication & English level…</p>`;
+    try {
+      const res = await api.languageTest(textInput, state.chosenPath?.title || "Candidate Role");
+      resultContainer.innerHTML = `
+        <div style="background: #ffffff; color: var(--ink); padding: 1rem; border-radius: 8px; border: 1px solid var(--ok);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <h3 style="margin: 0; color: #14532d;">CEFR Rating: ${ui.escapeHtml(res.cefr_level)}</h3>
+            <span style="font-weight: 700; background: var(--ok-soft); color: var(--ok); padding: 4px 10px; border-radius: 20px;">Score: ${res.score}/100</span>
+          </div>
+          <p style="margin: 0 0 0.4rem;"><strong>Clarity & Vocab:</strong> ${ui.escapeHtml(res.clarity_feedback)}</p>
+          <p style="margin: 0 0 0.4rem;"><strong>Workplace Tone:</strong> ${ui.escapeHtml(res.workplace_readiness)}</p>
+          <p style="margin: 0 0 0.2rem;"><strong>Improvement Tips:</strong></p>
+          <ul style="margin: 0; padding-left: 1.2rem;">${(res.recommended_tips || []).map((t) => `<li>${ui.escapeHtml(t)}</li>`).join("")}</ul>
+        </div>
+      `;
+
+      state.simpleEnglish = res.cefr_level.includes("A2") || res.cefr_level.includes("B1");
+      document.getElementById("simpleEnglish").checked = state.simpleEnglish;
+      if (state.profile) {
+        state.profile.english_level = res.cefr_level;
+      }
+    } catch (err) {
+      resultContainer.innerHTML = `<p style="color: var(--danger);">Evaluation failed: ${ui.escapeHtml(err.message)}</p>`;
+    }
+  });
+
   document.getElementById("fromText").onclick = async () => {
     const text = document.getElementById("profileText").value;
     if (!text.trim()) return;
@@ -771,6 +1116,7 @@ function bind() {
       if (n === 4 && state.matches.length) renderStep3List();
       if (n === 5 && state.tailored) renderApply();
       if (n === 6 && state.chosenPath) renderInterviewSetup();
+      if (n === 7) setStep(7);
     };
   });
   voice.wireMic((text) => {
@@ -788,9 +1134,11 @@ function bind() {
     }
   }, () => state.language);
   api.health().then((h) => {
-    console.log("Health check:", h)
+    console.log("Health check:", h);
     if (!h.elevenlabs) voice.setStatus("Voice keys missing — type instead. Text mode still works.");
   });
+
+  checkAuth();
 }
 
 bind();

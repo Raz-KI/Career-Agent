@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PathWay – Job search tracker + AI insights</title>
+<style>
+:root{--head:#124f5e;--bg:#f6f4ee;--card:#fffdf9;--ink:#1d2a30;--mute:#5d6e75;--line:#dcdfd8;--btn:#16687b;--logo:#c8622b;
+--applied:#3f6fa8;--interview:#b97a0e;--offer:#2b8a57;--rejected:#b14a55;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--head:#0c3843;--bg:#10181c;--card:#182227;--ink:#e8eef0;--mute:#97a8af;--line:#2b3a41;--btn:#1f8098;--applied:#6f9fd6;--interview:#e0a43c;--offer:#4fc084;--rejected:#e07b86}}
+:root[data-theme="dark"]{--head:#0c3843;--bg:#10181c;--card:#182227;--ink:#e8eef0;--mute:#97a8af;--line:#2b3a41;--btn:#1f8098;--applied:#6f9fd6;--interview:#e0a43c;--offer:#4fc084;--rejected:#e07b86}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Atkinson Hyperlegible","Segoe UI",system-ui,-apple-system,Arial,sans-serif;min-height:100vh}
+[hidden]{display:none!important}
+/* header */
+.top{background:var(--head);color:#fff;display:flex;align-items:center;gap:14px;padding:18px 24px;flex-wrap:wrap}
+.logo{width:46px;height:46px;border-radius:10px;background:var(--logo);display:grid;place-items:center;font-weight:700;font-size:18px;color:#fff}
+.brand{flex:1;min-width:200px}
+.brand b{display:block;font-size:18px;line-height:1.2}
+.brand span{font-size:14px;opacity:.9}
+.out{background:none;color:#fff;border:2px solid rgba(255,255,255,.85);border-radius:12px;padding:10px 18px;font:inherit;cursor:pointer}
+.out:hover{background:rgba(255,255,255,.12)}
+.tabs{background:var(--card);border-bottom:1px solid var(--line);padding:12px 24px}
+.tab{font:inherit;background:none;cursor:pointer;margin-right:8px;border:2px solid var(--btn);color:var(--ink);border-radius:10px;padding:8px 18px;font-weight:700}
+.tab.on{border-color:var(--logo)}
+/* cards */
+main{max-width:980px;margin:0 auto;padding:26px 20px 48px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px}
+.card+.card{margin-top:18px}
+h1{font-size:32px;line-height:1.2;margin:0 0 14px;font-weight:700}
+h2{font-size:20px;margin:0 0 12px;font-weight:700}
+p.lead{color:var(--mute);margin:0 0 20px}
+label{display:block;font-weight:700;margin:16px 0 6px}
+input,select{width:100%;font:inherit;color:var(--ink);background:var(--card);border:2px solid var(--line);border-radius:10px;padding:11px 12px}
+select{width:auto;border-left:6px solid var(--c);cursor:pointer;padding:8px 10px}
+.btn{font:inherit;font-weight:600;color:#fff;background:var(--btn);border:0;border-radius:10px;padding:12px 22px;cursor:pointer}
+.btn:hover{filter:brightness(1.1)}
+.btn.ghost{background:none;color:var(--ink);border:2px solid var(--ink);font-weight:500}
+:focus-visible{outline:3px solid var(--logo);outline-offset:2px}
+/* login */
+#login{min-height:calc(100vh - 80px);display:grid;place-items:center;padding:24px 16px}
+#login .card{width:100%;max-width:460px}
+.err{color:var(--rejected);font-weight:700;margin:12px 0 0;min-height:1.5em}
+.hint{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);color:var(--mute);font-size:14px}
+.hint code{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:1px 6px}
+/* insights */
+.mini{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}.mini span{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:4px 14px;font-size:14px}.mini b{font-size:16px}
+.ins{display:grid;gap:16px;margin-top:16px}.ins .card{margin:0;border-left:6px solid var(--btn)}
+.ins .tone-warn{border-left-color:var(--interview)}.ins .tone-good{border-left-color:var(--offer)}.ins .tone-info{border-left-color:var(--applied)}
+.ins p{margin:0 0 10px;white-space:pre-line}.ins ul{margin:6px 0 0;padding-left:20px}.ins li{margin-bottom:6px}
+.sub{font-size:13px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.04em;margin:14px 0 6px}
+.rate{display:grid;grid-template-columns:110px 1fr 70px;gap:10px;align-items:center;margin:6px 0;font-size:15px}
+.rate i{display:block;height:10px;background:var(--line);border-radius:5px;overflow:hidden}.rate u{display:block;height:100%;background:var(--offer);text-decoration:none}
+.rate b{text-align:right;font-size:14px;color:var(--mute)}
+.mt{padding:10px 0;border-top:1px solid var(--line)}.mt:first-of-type{border-top:0}.mt small{display:block;color:var(--mute)}
+.pill{display:inline-block;font-size:13px;font-weight:700;border-radius:999px;padding:1px 10px;border:1px solid var(--line);margin-left:6px}
+.stale{background:var(--bg);border:1px dashed var(--interview);border-radius:10px;padding:10px 14px;margin-top:14px}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+/* dashboard */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.stat{background:var(--card);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:14px;padding:16px 18px}
+.stat b{display:block;font-size:36px;line-height:1.1;color:var(--c);font-variant-numeric:tabular-nums}
+.stat span{color:var(--mute);font-size:15px}
+.bar{display:flex;height:18px;border-radius:9px;overflow:hidden;background:var(--line)}
+.bar i{display:block;height:100%;background:var(--c);transition:width .4s}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:12px;color:var(--mute);font-size:14px}
+.legend em{font-style:normal;display:inline-flex;align-items:center;gap:6px}
+.legend em:before{content:"";width:11px;height:11px;border-radius:3px;background:var(--c)}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:14px;color:var(--mute);font-weight:700;padding:6px 8px;border-bottom:2px solid var(--line)}
+td{padding:12px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+td small{display:block;color:var(--mute)}
+.empty{color:var(--mute);padding:14px 8px}
+form.add{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;align-items:end}
+form.add label{margin:0 0 6px}
+.foot{display:flex;justify-content:flex-end;margin-top:14px}
+@media(max-width:700px){.stats{grid-template-columns:repeat(2,1fr)}form.add{grid-template-columns:1fr}form.add>div{grid-column:auto!important}h1{font-size:26px}.card{padding:20px}}
+@media(prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="logo" aria-hidden="true">PW</div>
+  <div class="brand"><b>PathWay</b><span>AI career navigator for people rebuilding work in the UK</span></div>
+  <button class="out" id="logout" hidden>Log out</button>
+</header>
+
+<!-- LOGIN -->
+<section id="login">
+  <div class="card">
+    <h1>Log in</h1>
+    <p class="lead">Sign in to track your applications and see how your job search is going.</p>
+    <form id="lf" autocomplete="off" novalidate>
+      <label for="u">Username</label>
+      <input id="u" name="username" autocomplete="username" required>
+      <label for="p">Password</label>
+      <input id="p" name="password" type="password" autocomplete="current-password" required>
+      <div class="err" id="err" role="alert"></div>
+      <button class="btn" type="submit" style="margin-top:8px;width:100%">Log in</button>
+    </form>
+    <p class="hint">Demo account: username <code>test</code>, password <code>test</code></p>
+  </div>
+</section>
+
+<!-- APP -->
+<div id="app" hidden>
+<nav class="tabs" aria-label="Sections"><button class="tab on" id="tab-dash">Dashboard</button><button class="tab" id="tab-ai">AI insights</button></nav>
+<main id="p-dash">
+  <section class="stats" aria-label="Totals">
+    <div class="stat" style="--c:var(--applied)"><b id="n-total">0</b><span>Jobs applied to</span></div>
+    <div class="stat" style="--c:var(--interview)"><b id="n-interview">0</b><span>Interviews received</span></div>
+    <div class="stat" style="--c:var(--rejected)"><b id="n-rejected">0</b><span>Rejections</span></div>
+    <div class="stat" style="--c:var(--offer)"><b id="n-offer">0</b><span>Offers</span></div>
+  </section>
+
+  <section class="card">
+    <h2>Where your applications stand</h2>
+    <div class="bar" id="bar" role="img" aria-label="Status breakdown"></div>
+    <div class="legend" id="legend"></div>
+  </section>
+
+  <section class="card">
+    <h2>Recent applications</h2>
+    <div class="tw"><table>
+      <thead><tr><th>Role</th><th>Applied</th><th>Status</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table></div>
+  </section>
+
+  <section class="card">
+    <h2>Add an application</h2>
+    <form class="add" id="add">
+      <div><label for="f-role">Job title</label><input id="f-role" required></div>
+      <div><label for="f-co">Company</label><input id="f-co" required></div>
+      <div><label for="f-cat">Category</label><select id="f-cat" style="width:100%"><option>Engineering</option><option>Design</option><option>Research</option><option>Data</option><option>Other</option></select></div>
+      <div><label for="f-type">Work type</label><select id="f-type" style="width:100%"><option>Remote</option><option>Hybrid</option><option>On-site</option></select></div>
+      <div style="grid-column:1/-1"><label for="f-sk">Skills in the job description (comma separated)</label><input id="f-sk" placeholder="react, css, figma"></div>
+      <button class="btn" type="submit">Add application</button>
+    </form>
+    <div class="foot"><button class="btn ghost" id="reset" type="button">Reset sample data</button></div>
+  </section>
+</main>
+<main id="p-ai" hidden>
+  <section class="card">
+    <h1>AI insights</h1>
+    <p class="lead">Insights are written from your current dashboard, your applications and your CV (a sample CV for now).</p>
+    <div class="mini" id="mini"></div>
+    <button class="btn" id="gen">Generate insights</button>
+    <div class="msg" id="ai-msg" role="alert" style="color:var(--rejected);font-weight:700;margin-top:10px"></div>
+    <div class="stale" id="stale" hidden>Your dashboard has changed since these insights were made. Regenerate to update them.</div>
+  </section>
+  <div class="ins" id="ins"></div>
+</main>
+</div>
+
+<script>
+var USER="test",PASS="test",SESSION="pathway-session",KEY="job-tracker-v2";
+var $=function(i){return document.getElementById(i)};
+
+/* ---------- auth ---------- */
+function loggedIn(){try{return sessionStorage.getItem(SESSION)==="1"}catch(e){return window.__in===true}}
+function setIn(v){window.__in=v;try{v?sessionStorage.setItem(SESSION,"1"):sessionStorage.removeItem(SESSION)}catch(e){}}
+function show(){var a=loggedIn();$("login").hidden=a;$("app").hidden=!a;$("logout").hidden=!a;if(a)render();else $("u").focus()}
+$("lf").addEventListener("submit",function(e){
+  e.preventDefault();
+  if($("u").value.trim()===USER&&$("p").value===PASS){$("err").textContent="";setIn(true);$("p").value="";show()}
+  else{$("err").textContent="Incorrect username or password. Try again.";$("p").value="";$("p").focus()}
+});
+$("logout").addEventListener("click",function(){setIn(false);$("u").value="";show()});
+
+/* ---------- tracker ---------- */
+var dirty=false,hasIns=false;
+var STATUS=[["applied","Applied","--applied"],["interview","Interview received","--interview"],["offer","Offered","--offer"],["rejected","Rejected","--rejected"]];
+function d(n){var t=new Date();t.setDate(t.getDate()-n);return t.toISOString().slice(0,10)}
+function sample(){return[
+{id:1,role:"Product designer",co:"Northwind",date:d(1),s:"applied",cat:"Design",type:"Remote",skills:["figma","prototyping","user research","design systems"],desc:"Own end-to-end design of a B2B product."},
+{id:2,role:"Frontend engineer",co:"Lumen Labs",date:d(2),s:"interview",cat:"Engineering",type:"Remote",skills:["react","javascript","css","typescript"],desc:"Build the customer web app in React."},
+{id:3,role:"UX researcher",co:"Harbor Health",date:d(4),s:"rejected",cat:"Research",type:"On-site",skills:["user research","interviewing","analytics","figma"],desc:"Run studies with patients and clinicians."},
+{id:4,role:"Design systems lead",co:"Fieldnote",date:d(6),s:"applied",cat:"Design",type:"Hybrid",skills:["design systems","figma","css","accessibility"],desc:"Lead the component library and standards."},
+{id:5,role:"Web developer",co:"Kestrel Studio",date:d(8),s:"offer",cat:"Engineering",type:"Remote",skills:["html","css","javascript","react"],desc:"Ship marketing sites and web apps for clients."},
+{id:6,role:"Product engineer",co:"Tidewater",date:d(10),s:"interview",cat:"Engineering",type:"Hybrid",skills:["react","node","typescript","sql"],desc:"Work across the stack on new features."},
+{id:7,role:"Interaction designer",co:"Paperplane",date:d(13),s:"rejected",cat:"Design",type:"On-site",skills:["figma","prototyping","motion","user research"],desc:"Design animations and flows for a mobile app."},
+{id:8,role:"Full-stack developer",co:"Brightside",date:d(15),s:"applied",cat:"Engineering",type:"Hybrid",skills:["javascript","node","sql","python"],desc:"Build APIs and interfaces for internal tools."},
+{id:9,role:"Data analyst",co:"Orchard",date:d(17),s:"rejected",cat:"Data",type:"On-site",skills:["sql","python","tableau","excel"],desc:"Report on product and sales performance."},
+{id:10,role:"Content designer",co:"Pinewood",date:d(19),s:"applied",cat:"Design",type:"Remote",skills:["writing","figma","user research","accessibility"],desc:"Shape product language and UX writing."}]}
+var jobs;
+try{jobs=JSON.parse(localStorage.getItem(KEY))}catch(e){jobs=null}
+if(!Array.isArray(jobs))jobs=sample();
+function save(){dirty=true;if(hasIns)$("stale").hidden=false;try{localStorage.setItem(KEY,JSON.stringify(jobs))}catch(e){}}
+function count(s){return jobs.filter(function(j){return j.s===s}).length}
+function esc(t){var e=document.createElement("div");e.textContent=t;return e.innerHTML}
+function fmt(s){return new Date(s+"T00:00:00").toLocaleDateString(undefined,{day:"numeric",month:"short"})}
+function render(){
+  var total=jobs.length;
+  $("n-total").textContent=total;
+  $("n-interview").textContent=count("interview");
+  $("n-rejected").textContent=count("rejected");
+  $("n-offer").textContent=count("offer");
+  var bar="",leg="";
+  STATUS.forEach(function(x){var n=count(x[0]);
+    bar+='<i style="--c:var('+x[2]+');width:'+(total?n/total*100:0)+'%"></i>';
+    leg+='<em style="--c:var('+x[2]+')">'+x[1]+' '+n+'</em>'});
+  $("bar").innerHTML=bar;$("legend").innerHTML=leg;
+  var sorted=jobs.slice().sort(function(a,b){return b.date<a.date?-1:b.date>a.date?1:b.id-a.id});
+  var h="";
+  sorted.forEach(function(j){
+    var cur=STATUS.filter(function(x){return x[0]===j.s})[0];
+    h+='<tr><td><strong>'+esc(j.role)+'</strong><small>'+esc(j.co)+'</small></td><td>'+fmt(j.date)+'</td><td>'
+    +'<select data-id="'+j.id+'" style="--c:var('+cur[2]+')" aria-label="Status for '+esc(j.role)+' at '+esc(j.co)+'">'
+    +STATUS.map(function(x){return'<option value="'+x[0]+'"'+(x[0]===j.s?" selected":"")+'>'+x[1]+'</option>'}).join("")
+    +'</select></td></tr>'});
+  $("rows").innerHTML=h||'<tr><td class="empty" colspan="3">No applications yet. Add your first one below.</td></tr>';
+}
+$("rows").addEventListener("change",function(e){
+  var id=+e.target.getAttribute("data-id");
+  jobs.forEach(function(j){if(j.id===id)j.s=e.target.value});
+  save();render()});
+$("add").addEventListener("submit",function(e){
+  e.preventDefault();
+  var r=$("f-role"),c=$("f-co");
+  jobs.push({id:Date.now(),role:r.value.trim(),co:c.value.trim(),date:d(0),s:"applied",cat:$("f-cat").value,type:$("f-type").value,desc:"",skills:$("f-sk").value.split(",").map(function(x){return x.trim().toLowerCase()}).filter(Boolean)});$("f-sk").value="";
+  r.value="";c.value="";save();render()});
+$("reset").addEventListener("click",function(){jobs=sample();save();render()});
+
+/* ---------- AI insights ---------- */
+function go(p){$("p-dash").hidden=p!=="dash";$("p-ai").hidden=p!=="ai";$("tab-dash").className="tab"+(p==="dash"?" on":"");$("tab-ai").className="tab"+(p==="ai"?" on":"");if(p==="ai")mini()}
+$("tab-dash").onclick=function(){go("dash")};$("tab-ai").onclick=function(){go("ai")};
+function mini(){$("mini").innerHTML=[["Applied",jobs.length],["Interviews",count("interview")],["Offers",count("offer")],["Rejected",count("rejected")],["Waiting",count("applied")]].map(function(x){return"<span><b>"+x[1]+"</b> "+x[0]+"</span>"}).join("")}
+function bars(rows){return rows.map(function(r){return'<div class="rate"><span>'+esc(r.name)+'</span><i><u style="width:'+r.rate+'%"></u></i><b>'+r.pos+" of "+r.n+"</b></div>"}).join("")}
+function ai(t){return t?'<p>'+esc(t)+"</p>":""}
+function paint(o){hasIns=true;dirty=false;$("stale").hidden=true;mini();var a=o.ai||{};
+ var h='<div class="card tone-'+o.headline.tone+'"><h2>'+esc(o.headline.title)+"</h2>"+(ai(a.headline)||ai(o.headline.text))+"</div>";
+ h+='<div class="card"><h2>CV feedback</h2>'+ai(a.cv_feedback)+'<div class="sub">What to fix</div><ul>'+o.cv.map(function(x){return"<li>"+esc(x)+"</li>"}).join("")+"</ul></div>";
+ h+='<div class="card"><h2>Where you get positive responses</h2>'+(ai(a.positive_patterns)||ai(o.patterns.text))+'<div class="sub">By job category</div>'+bars(o.patterns.category)+'<div class="sub">By work type</div>'+bars(o.patterns.type)+"</div>";
+ h+='<div class="card"><h2>Strongest matches</h2>'+ai(a.strongest_matches)+o.matches.map(function(m){return'<div class="mt"><strong>'+esc(m.role)+"</strong> at "+esc(m.co)+'<span class="pill">'+m.match+'% match</span><span class="pill">'+esc(m.s)+"</span><small>"+esc(m.desc||"")+(m.missing.length?" Missing from your CV: "+esc(m.missing.join(", "))+".":" Your CV covers every skill listed.")+"</small></div>"}).join("")+"</div>";
+ h+='<div class="card'+(o.interview.emphasis?" tone-warn":"")+'"><h2>Interview practice</h2>'+(ai(a.interview_advice)||ai(o.interview.text))+(a.interview_advice?ai(o.interview.text):"")+'<button class="btn" disabled>Practise interviews (coming soon)</button></div>';
+ h+='<p class="lead">'+(o.engine==="elevenlabs"?"Written by the ElevenLabs coach agent from your dashboard data.":"Built-in analysis shown because the ElevenLabs coach could not be reached. Check the server terminal for the reason.")+"</p>";
+ $("ins").innerHTML=h}
+$("gen").onclick=function(){var b=$("gen");b.disabled=true;b.textContent="Analysing…";$("ai-msg").textContent="";
+ fetch("/api/insights",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({jobs:jobs})}).then(function(r){return r.json()}).then(paint)
+ .catch(function(){$("ai-msg").textContent="Could not reach the insights server. Start it with: python server.py, then open http://localhost:8001"})
+ .then(function(){b.disabled=false;b.textContent="Regenerate insights"})};
+show();
+</script>
+</body>
+</html>

@@ -9,7 +9,7 @@ from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from backend.config import get_settings
 from backend.llm import LlmError
@@ -30,8 +30,10 @@ from backend.models import (
 )
 from backend.services import application as application_svc
 from backend.services import careers as careers_svc
+from backend.services import insights as insights_svc
 from backend.services import interview as interview_svc
 from backend.services import jobs as jobs_svc
+from backend.services import language_test as language_test_svc
 from backend.services import profile as profile_svc
 from backend.services import safety as safety_svc
 from backend.services import voice as voice_svc
@@ -308,6 +310,26 @@ def delete_data(body: DeleteBody) -> dict:
     else:
         interview_svc.clear_all()
     return {"ok": True, "sessions": len(SESSIONS)}
+
+
+class InsightsRequest(BaseModel):
+    jobs: list[dict] = Field(default_factory=list)
+    custom_cv: dict | None = None
+
+
+class LanguageTestBody(BaseModel):
+    text: str
+    target_role: str | None = None
+
+
+@app.post("/api/insights")
+def get_insights(body: InsightsRequest) -> dict:
+    return insights_svc.build_insights(body.jobs, body.custom_cv)
+
+
+@app.post("/api/profile/language_test")
+def profile_language_test(body: LanguageTestBody) -> dict:
+    return language_test_svc.evaluate_language_sample(body.text, body.target_role).model_dump()
 
 
 if FRONTEND.exists():
