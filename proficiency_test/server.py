@@ -6,7 +6,7 @@ import os, re, json, math, requests
 from flask import Flask, request, jsonify, Response
 
 app = Flask(__name__, static_folder="static", static_url_path="")
-XI_KEY = 'sk_3b035fa719e607ecb97bfa77146b1a6bc7f2326c4d269d38'
+XI_KEY = ''
 VOICE = os.environ.get("ELEVENLABS_VOICE_ID", "21m00Tcm4TlvDq8ikWAM")
 TTS_MODEL = "eleven_multilingual_v2"
 AGENT_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".agent_id")

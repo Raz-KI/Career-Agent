@@ -4,7 +4,7 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__, static_folder="static", static_url_path="")
 # Hard-coded for now, as requested. Server-side only: it is never sent to the browser. Move to an env var before sharing this folder.
-ELEVENLABS_API_KEY = os.environ.get("ELEVENLABS_API_KEY") or "sk_3b035fa719e607ecb97bfa77146b1a6bc7f2326c4d269d38"
+ELEVENLABS_API_KEY = os.environ.get("ELEVENLABS_API_KEY") or ""
 AGENT_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".coach_agent_id")
 
 # Dummy CV until the upload step exists.
