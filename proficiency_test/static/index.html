@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PathWay – Language proficiency test</title>
+<style>
+:root{--head:#124f5e;--bg:#f6f4ee;--card:#fffdf9;--ink:#1d2a30;--mute:#5d6e75;--line:#dcdfd8;--btn:#16687b;--logo:#c8622b;--ok:#2b8a57;--bad:#b14a55}
+@media (prefers-color-scheme:dark){:root{--head:#0c3843;--bg:#10181c;--card:#182227;--ink:#e8eef0;--mute:#97a8af;--line:#2b3a41;--btn:#1f8098;--ok:#4fc084;--bad:#e07b86}}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Atkinson Hyperlegible","Segoe UI",system-ui,Arial,sans-serif}
+.top{background:var(--head);color:#fff;display:flex;align-items:center;gap:14px;padding:18px 24px}
+.logo{width:46px;height:46px;border-radius:10px;background:var(--logo);display:grid;place-items:center;font-weight:700;font-size:18px}
+.top b{display:block;font-size:18px;line-height:1.2}.top span{font-size:14px;opacity:.9}
+main{max-width:860px;margin:0 auto;padding:26px 20px 48px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px}.card+.card{margin-top:18px}
+h1{font-size:30px;line-height:1.2;margin:0 0 12px}h2{font-size:20px;margin:0 0 10px}
+.lead{color:var(--mute);margin:0 0 18px}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 20px}
+.chip input{position:absolute;opacity:0}
+.chip span{display:inline-block;border:2px solid var(--btn);border-radius:10px;padding:8px 16px;font-weight:700;cursor:pointer}
+.chip input:checked+span{border-color:var(--logo);background:var(--logo);color:#fff}
+.chip input:focus-visible+span{outline:3px solid var(--logo);outline-offset:2px}
+.btn{font:inherit;font-weight:600;color:#fff;background:var(--btn);border:0;border-radius:10px;padding:12px 22px;cursor:pointer}
+.btn:disabled{opacity:.5;cursor:not-allowed}.btn.ghost{background:none;color:var(--ink);border:2px solid var(--ink);font-weight:500}
+.btn.rec{background:var(--bad)}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px}
+:focus-visible{outline:3px solid var(--logo);outline-offset:2px}
+.steps{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.step{border:2px solid var(--line);border-radius:10px;padding:5px 14px;color:var(--mute);font-weight:700}
+.step.on{border-color:var(--logo);color:var(--ink)}.step.done{border-color:var(--btn);color:var(--ink)}
+.task{font-size:19px;padding:16px;border-left:5px solid var(--btn);background:var(--bg);border-radius:8px}
+.timer{font-size:34px;font-weight:700;font-variant-numeric:tabular-nums}
+.meter{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin-top:8px}.meter i{display:block;height:100%;width:0;background:var(--logo)}
+.tr{margin-top:16px;padding:14px;border:1px dashed var(--line);border-radius:10px;color:var(--mute)}
+.msg{margin-top:12px;color:var(--bad);font-weight:700;min-height:1.4em}
+.big{display:flex;align-items:baseline;gap:14px;margin-bottom:10px}.big b{font-size:52px;line-height:1;color:var(--logo)}.big span{font-size:20px;font-weight:700}
+.crit{display:grid;grid-template-columns:130px 40px 1fr;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.crit em{font-style:normal;font-weight:700}.crit b{color:var(--btn)}.crit small{color:var(--mute);font-size:14px;display:block}
+table{width:100%;border-collapse:collapse}th{text-align:left;color:var(--mute);font-size:14px;padding:6px 8px;border-bottom:2px solid var(--line)}
+td{padding:10px 8px;border-bottom:1px solid var(--line)}tr:last-child td{border-bottom:0}.lvl{font-weight:700;color:var(--logo);font-size:18px}
+@media(max-width:600px){.crit{grid-template-columns:1fr}.card{padding:20px}}
+</style>
+</head>
+<body>
+<header class="top"><div class="logo" aria-hidden="true">PW</div><div><b>PathWay</b><span>Language proficiency test</span></div></header>
+<main>
+<section class="card" id="v-pick">
+  <h1>Test your speaking</h1>
+  <p class="lead">Choose one or more languages. You will hear three short tasks in each and answer out loud. We score what you say, not your accent.</p>
+  <div class="chips" id="chips" role="group" aria-label="Languages"></div>
+  <button class="btn" id="start" disabled>Start test</button>
+  <div class="msg" id="pickmsg"></div>
+</section>
+
+<section class="card" id="v-test" hidden>
+  <h2 id="t-lang"></h2>
+  <div class="steps" id="steps"></div>
+  <div class="task" id="t-text"></div>
+  <div class="row"><button class="btn ghost" id="play">Play examiner</button>
+    <button class="btn" id="rec" disabled>Start answering</button><span class="timer" id="timer" aria-live="off"></span></div>
+  <div class="meter"><i id="meter"></i></div>
+  <div class="tr" id="t-tr" hidden></div>
+  <div class="msg" id="t-msg" role="alert"></div>
+</section>
+
+<section class="card" id="v-res" hidden></section>
+
+<section class="card" id="v-prof">
+  <h2>Your proficiency</h2>
+  <p class="lead" id="prof-empty">No tests taken yet. Each language you complete is added here.</p>
+  <table id="prof" hidden><thead><tr><th>Language</th><th>Level</th><th>Score</th><th>Taken</th></tr></thead><tbody></tbody></table>
+</section>
+</main>
+
+<script>
+var $=function(i){return document.getElementById(i)};
+var LS="pathway-proficiency",queue=[],cur=null,part=0,tasks=null,answers=[],rec=null,chunks=[],tick=null,stream=null,audio=null;
+function load(){try{return JSON.parse(localStorage.getItem(LS))||{}}catch(e){return{}}}
+function save(o){try{localStorage.setItem(LS,JSON.stringify(o))}catch(e){}}
+function api(u,o){return fetch(u,o).then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.error||"Request failed");return j})})}
+function show(v){["v-pick","v-test","v-res"].forEach(function(x){$(x).hidden=x!==v});$("v-prof").hidden=v==="v-test"}
+
+/* profile */
+function renderProf(){var p=load(),k=Object.keys(p);$("prof-empty").hidden=k.length>0;$("prof").hidden=!k.length;
+  $("prof").querySelector("tbody").innerHTML=k.map(function(c){var r=p[c];return"<tr><td>"+r.name+'</td><td class="lvl">'+r.cefr+"</td><td>"+r.overall.toFixed(1)+" / 5</td><td>"+r.date+"</td></tr>"}).join("")}
+
+/* pick */
+api("/api/languages").then(function(ls){$("chips").innerHTML=ls.map(function(l){return'<label class="chip"><input type="checkbox" value="'+l.code+'" data-n="'+l.name+'"><span>'+l.name+"</span></label>"}).join("");
+  $("chips").addEventListener("change",function(){$("start").disabled=!$("chips").querySelector("input:checked")})}).catch(function(e){$("pickmsg").textContent=e.message});
+$("start").onclick=function(){queue=[].map.call($("chips").querySelectorAll("input:checked"),function(i){return{code:i.value,name:i.getAttribute("data-n")}});next()};
+
+/* test flow */
+function next(){if(!queue.length){show("v-pick");renderProf();return}
+  cur=queue.shift();part=0;answers=[];$("t-lang").textContent=cur.name+" speaking test";$("t-msg").textContent="";
+  api("/api/tasks?lang="+cur.code).then(function(t){tasks=t;show("v-test");startPart(true)}).catch(function(e){$("pickmsg").textContent=e.message;show("v-pick")})}
+function steps(){$("steps").innerHTML=[1,2,3].map(function(n){return'<span class="step '+(n-1<part?"done":n-1===part?"on":"")+'">Part '+n+"</span>"}).join("")}
+function startPart(welcome){steps();var t=tasks.tasks[part];$("t-text").textContent=t.text;$("t-tr").hidden=true;$("timer").textContent=fmt(t.limit);$("meter").style.width="0";
+  $("rec").textContent="Start answering";$("rec").className="btn";$("rec").disabled=false;$("play").disabled=false;
+  speak(welcome?[0,part+1]:[part+1])}
+function speak(idx){var i=idx.shift();$("t-msg").textContent="";if(audio)audio.pause();audio=new Audio("/api/tts?lang="+cur.code+"&i="+i);
+  audio.onended=function(){if(idx.length)speak(idx)};audio.onerror=function(){$("t-msg").textContent="Could not play the examiner audio. Check the server and your API key."};audio.play().catch(function(){})}
+$("play").onclick=function(){speak([part+1])};
+function fmt(s){return Math.floor(s/60)+":"+("0"+s%60).slice(-2)}
+
+$("rec").onclick=function(){if(rec&&rec.state==="recording"){rec.stop();return}
+  if(audio)audio.pause();
+  navigator.mediaDevices.getUserMedia({audio:true}).then(function(s){stream=s;chunks=[];rec=new MediaRecorder(s);
+    rec.ondataavailable=function(e){if(e.data.size)chunks.push(e.data)};rec.onstop=send;rec.start();
+    var limit=tasks.tasks[part].limit,left=limit;$("rec").textContent="Stop";$("rec").className="btn rec";$("play").disabled=true;
+    tick=setInterval(function(){left--;$("timer").textContent=fmt(Math.max(left,0));$("meter").style.width=((limit-left)/limit*100)+"%";if(left<=0)rec.stop()},1000)})
+  .catch(function(){$("t-msg").textContent="Microphone access was blocked. Allow it in your browser and try again."})};
+
+function send(){clearInterval(tick);stream.getTracks().forEach(function(t){t.stop()});$("rec").disabled=true;$("rec").textContent="Transcribing…";$("t-msg").textContent="";
+  var fd=new FormData();fd.append("audio",new Blob(chunks,{type:rec.mimeType||"audio/webm"}),"answer.webm");fd.append("lang",cur.code);
+  api("/api/transcribe",{method:"POST",body:fd}).then(function(r){answers.push(r);$("t-tr").hidden=false;$("t-tr").textContent=r.transcript||"(No speech detected)";
+    $("rec").textContent=part<2?"Next part":"See results";$("rec").className="btn";$("rec").disabled=false;
+    $("rec").onclick=function(){$("rec").onclick=null;$("rec").onclick=window.__orig;part++;if(part<3)startPart(false);else finish()}})
+  .catch(function(e){$("t-msg").textContent=e.message;$("rec").textContent="Try this part again";$("rec").disabled=false;$("rec").className="btn";$("rec").onclick=window.__orig})}
+window.__orig=$("rec").onclick;
+
+function finish(){$("t-msg").textContent="";$("rec").disabled=true;$("rec").textContent="Scoring…";
+  api("/api/evaluate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({lang:cur.code,parts:answers})}).then(result).catch(function(e){$("t-msg").textContent=e.message})}
+var NAMES={fluency:"Fluency",vocabulary:"Vocabulary",grammar:"Grammar",coherence:"Coherence",pronunciation:"Pronunciation"};
+function esc(t){var e=document.createElement("div");e.textContent=t;return e.innerHTML}
+function result(r){var p=load();p[cur.code]={name:cur.name,cefr:r.cefr,overall:r.overall,date:new Date().toLocaleDateString()};save(p);
+  $("v-res").innerHTML='<h2>'+cur.name+' result</h2><div class="big"><b>'+r.cefr+'</b><span>'+r.overall.toFixed(1)+' / 5 overall</span></div>'
+   +Object.keys(NAMES).map(function(k){return'<div class="crit"><em>'+NAMES[k]+'</em><b>'+r.scores[k].toFixed(1)+'</b><small>'+esc(r.observations[k]||"")+"</small></div>"}).join("")
+   +'<p><strong>Next step:</strong> '+esc(r.tip)+'</p><p class="lead">Pronunciation counts for only 5% of the score. Answer quality counts most. '
+   +(r.engine==="elevenlabs"?"Scored by an ElevenLabs examiner agent.":"Scored with an automatic estimate from your transcript, because the ElevenLabs examiner could not be reached. Check the server terminal for the reason.")+'</p>'
+   +'<div class="row"><button class="btn" id="go">'+(queue.length?"Continue to "+queue[0].name:"Finish")+'</button></div>';
+  $("go").onclick=next;show("v-res");renderProf();$("v-prof").hidden=false;$("rec").onclick=window.__orig}
+renderProf();
+</script>
+</body>
+</html>

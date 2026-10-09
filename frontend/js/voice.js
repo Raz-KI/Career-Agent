@@ -47,79 +47,81 @@ export async function playText(text, { slow = false, statusElementId } = {}) {
   }
 }
 
-export async function startRecording() {
-  try {
-    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  } catch {
-    setStatus("Microphone permission denied. You can still type.");
-    return false;
-  }
-  chunks = [];
-  const mime = MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : "";
-  mediaRecorder = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
-  mediaRecorder.ondataavailable = (e) => {
-    if (e.data.size) chunks.push(e.data);
-  };
-  mediaRecorder.start();
-  document.getElementById("micBtn")?.classList.add("live");
-  setStatus("Listening…");
-  return true;
-}
+const SpeechRecognition = typeof window !== "undefined" && (window.SpeechRecognition || window.webkitSpeechRecognition);
 
-export function stopRecording() {
-  return new Promise((resolve) => {
-    if (!mediaRecorder || mediaRecorder.state === "inactive") {
-      resolve(null);
-      return;
-    }
-    mediaRecorder.onstop = () => {
-      stream?.getTracks().forEach((t) => t.stop());
-      document.getElementById("micBtn")?.classList.remove("live");
-      const blob = new Blob(chunks, { type: mediaRecorder.mimeType || "audio/webm" });
-      resolve(blob);
-    };
-    mediaRecorder.stop();
-  });
-}
-
-export async function captureAndTranscribe(language) {
-  setStatus("Transcribing…");
-  const blob = await stopRecording();
-  if (!blob || blob.size < 800) {
-    setStatus("I did not catch that. Try again or type.");
-    return "";
-  }
-  try {
-    const result = await stt(blob, language);
-    setStatus("Voice ready");
-    return result.text || "";
-  } catch (err) {
-    setStatus(err.message || "Could not transcribe. Please type.");
-    return "";
-  }
-}
+let recognitionInstance = null;
+let lastTranscript = "";
 
 export function wireMic(onText, getLanguage) {
   const btn = document.getElementById("micBtn");
   if (!btn) return;
-  const start = async () => {
-    await startRecording();
-  };
-  const end = async () => {
-    const text = await captureAndTranscribe(getLanguage());
-    if (text) onText(text);
-  };
-  btn.addEventListener("mousedown", start);
-  btn.addEventListener("mouseup", end);
-  btn.addEventListener("mouseleave", () => {
-    if (mediaRecorder && mediaRecorder.state === "recording") end();
-  });
-  btn.addEventListener("touchstart", (e) => {
-    e.preventDefault();
-    start();
-  });
-  btn.addEventListener("touchend", (e) => {
-    e.preventDefault();
-    end();
-  });
+
+  if (SpeechRecognition) {
+    btn.addEventListener("mousedown", (e) => {
+      e.preventDefault();
+      try {
+        lastTranscript = "";
+        recognitionInstance = new SpeechRecognition();
+        recognitionInstance.continuous = true;
+        recognitionInstance.interimResults = true;
+        const lang = getLanguage ? getLanguage() : "en";
+        recognitionInstance.lang = lang === "uk" ? "uk-UA" : lang === "pl" ? "pl-PL" : lang === "es" ? "es-ES" : "en-GB";
+
+        recognitionInstance.onstart = () => {
+          btn.classList.add("live");
+          setStatus("Listening… speak into your microphone");
+        };
+
+        recognitionInstance.onresult = (event) => {
+          let current = "";
+          for (let i = 0; i < event.results.length; i++) {
+            current += event.results[i][0].transcript;
+          }
+          lastTranscript = current;
+        };
+
+        recognitionInstance.onerror = (evt) => {
+          btn.classList.remove("live");
+          if (evt.error === "not-allowed") {
+            setStatus("Microphone permission denied. You can type instead.");
+          } else {
+            setStatus("Speech recognition error. Please try again or type.");
+          }
+        };
+
+        recognitionInstance.onend = () => {
+          btn.classList.remove("live");
+          setStatus("Voice ready");
+          const text = lastTranscript.trim();
+          if (text) {
+            onText(text);
+          } else {
+            setStatus("No speech detected. Hold button to speak or type.");
+          }
+        };
+
+        recognitionInstance.start();
+      } catch (err) {
+        console.warn("Speech recognition start error:", err);
+      }
+    });
+
+    const stopMic = (e) => {
+      e.preventDefault();
+      if (recognitionInstance) {
+        try {
+          recognitionInstance.stop();
+        } catch (err) {}
+      }
+    };
+
+    btn.addEventListener("mouseup", stopMic);
+    btn.addEventListener("mouseleave", stopMic);
+    btn.addEventListener("touchend", stopMic);
+  } else {
+    btn.addEventListener("click", () => {
+      const text = prompt("Default voice-to-text is not supported in this browser. Please type your answer:");
+      if (text) onText(text);
+    });
+  }
 }
